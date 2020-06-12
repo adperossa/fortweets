@@ -8,8 +8,11 @@ const express = require('express');
 const path = require('path');
 const expHbs = require("express-handlebars");
 const bodyParser = require("body-parser");
-const expSession = require("express-session");
+// const expSession = require("express-session");
 const Twitter = require("twitter");
+
+// Import own modules
+const users = require('./models/users');
 
 
 // Initialization and configuration -----------------------
@@ -50,7 +53,7 @@ app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
   res.render('home');
-})
+});
 
 app.get('/search', (req, res) => {
 
@@ -63,17 +66,34 @@ app.get('/search', (req, res) => {
   
   twclient.get("tweets/search/30day/dev", { query: req.query.q, maxResults: 10 }, (err, data, response) => {
     if(err) console.log(err);
-    res.json(data);  // Raw response object.
+    res.json(data);
+  })
+
+});
+
+app.post('/register', (req, res) => {
+  
+  // Validate correct request params
+  if (!req.body.username || !req.body.password || !req.body.passwordConfirm) {
+    return res.status(400).json({
+      success: false,
+      message: "Bad request, missing or wrong required parameters"
+    });
+  }
+
+  users.create(req.body.username, req.body.password, result => {
+
+    res.json(result);
+
   })
 
 
 
-  
 
+});
 
-})
 
 // Start server
 app.listen(process.env.HTTP_PORT, () => {
   console.log(`Servidor iniciado en puerto ${process.env.HTTP_PORT}`);
-})
+});
