@@ -8,11 +8,12 @@ const express = require('express');
 const path = require('path');
 const expHbs = require("express-handlebars");
 const bodyParser = require("body-parser");
-// const expSession = require("express-session");
+const expSession = require("express-session");
 const Twitter = require("twitter");
+const ObjectID = require('mongodb').ObjectID;
 
 // Import own modules
-const users = require('./models/users');
+const user = require('./models/user');
 
 
 // Initialization and configuration -----------------------
@@ -46,6 +47,13 @@ app.use(express.static(path.join(__dirname, "public")));
 // Body Parser para Content-Type "application/json"
 app.use(bodyParser.json());
 
+// Session
+app.use(expSession({
+  secret: "Random encryption string ",
+  resave: false,
+  saveUninitialized: false
+}));
+
 //  End Middlewares ---------------------------------------
 
 
@@ -60,19 +68,20 @@ app.get('/search', (req, res) => {
   if (!req.query.q) {
     return res.status(400).json({
       success: false,
-      message: "Invalid request, missing query parameter"
+      message: 'Invalid request, missing query parameter'
     });
   }
-  
-  twclient.get("tweets/search/30day/dev", { query: req.query.q, maxResults: 10 }, (err, data, response) => {
-    if(err) console.log(err);
+
+  twclient.get('tweets/search/30day/dev', { query: req.query.q, maxResults: 10 }, (err, data, response) => {
+    if (err) console.log(err);
+
     res.json(data);
   })
 
 });
 
 app.post('/register', (req, res) => {
-  
+
   // Validate correct request params
   if (!req.body.username || !req.body.password || !req.body.passwordConfirm) {
     return res.status(400).json({
@@ -81,17 +90,105 @@ app.post('/register', (req, res) => {
     });
   }
 
-  users.create(req.body.username, req.body.password, result => {
+  // Construct the new user object
+  const newUser = {
+    username: req.body.username,
+    password: req.body.password,
+    favorites: []
+  };
+
+  user.create(newUser, result => {
 
     res.json(result);
 
   })
 
+});
 
+app.post('/login', (req, res) => {
 
+  // Validate correct request params
+  if (!req.body.username || !req.body.password) {
+    return res.status(400).json({
+      success: false,
+      message: "Bad request, missing or wrong required parameters"
+    });
+  }
+
+  // Construct user object to validate
+  const credentials = {
+    username: req.body.username,
+    password: req.body.password
+  }
+
+  user.get(credentials, result => {
+
+    if (!result.success) {
+      // No se pudo validar usuario
+      return;
+    } else {
+      req.session.userId = result.data._id.toString();
+      res.json(result);
+    }
+
+  })
 
 });
 
+app.get('/favorites', (req, res) => {
+
+  // Construct user object to validate
+  const loggedUser = {
+    _id: new ObjectID('5ee6fbd32ce3b03754d3c198')
+  }
+
+  user.get(loggedUser, result => {
+
+    if (!result.success) {
+      // No se pudo validar usuario
+      return;
+    }
+
+    idList = result.data.favorites.join();
+
+    twclient.get('statuses/lookup', { id: idList }, (err, data, response) => {
+      if (err) console.log(err);
+
+      res.json(response);
+    });
+
+  });
+
+})
+
+app.post('/favorites/:action', (req, res) => {
+
+  // // Validate auth
+  // if (!req.session.userId) {
+  //   return res.status(401).json({
+  //     success: false,
+  //     message: "User is not logged in"
+  //   });
+  // }
+
+  // Validate required params
+  if (!req.body.tweetId) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing parameter: tweet id"
+    });
+  }
+
+  // Validate allowed actions
+  if (req.params.action !== 'add' && req.params.action !== 'remove') {
+    return res.sendStatus(404);
+  }
+
+  user.updateFavorites(req.params.action, "5ee6fbd32ce3b03754d3c198", req.body.tweetId, result => {
+    res.json(result);
+  })
+
+})
 
 // Start server
 app.listen(process.env.HTTP_PORT, () => {
