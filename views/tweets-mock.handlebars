@@ -1,0 +1,37 @@
+{{#each data.tweets}}
+
+<div class="card content">
+  <div class="content">
+    <space></space>
+    <div class="tile tile--center">
+      <div class="tile__icon">
+        <figure class="avatar">
+          <img
+            src="https://pbs.twimg.com/profile_images/378800000633037068/acf9c28b3b79a189b355ebe4c303bf21_normal.jpeg"
+            alt="Person">
+        </figure>
+      </div>
+
+      <div class="tile__container">
+        <p class="tile__title">{{this.Name}}</p>
+        <p class="tile__subtitle"><a>@{{this.screen_name}}</a></p>
+      </div>
+    </div>
+    <p>{{this.Text}}</p>
+    {{#if this.URLs}}
+      <a href="{{this.URLs}}" target='_blank'>{{this.URLs}}</a>
+    {{/if}}
+  </div>
+  <div class="card-footer level content">
+    {{this.created_at}}
+    {{#if ../data.loggedUser}}
+    <div class="pull-right">
+      <div class="btn-container">
+        <button class="btn btn-info btn-small btn-guardar" onclick="favSave('{{this.id}}')">Guardar</button>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+{{/each}}

@@ -16,7 +16,8 @@ searchForm.addEventListener('submit', e => {
       return res.text();
     })
     .then(data => {
-      twSection.innerHTML += data;
+      twSection.innerHTML = data;
+      window.location.href= '#tweets';
     })
     .catch(err => {
       console.warn(err);

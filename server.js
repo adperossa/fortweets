@@ -11,6 +11,7 @@ const bodyParser = require("body-parser");
 const expSession = require("express-session");
 const Twitter = require("twitter");
 const ObjectID = require('mongodb').ObjectID;
+const fs = require('fs');
 
 // Import own modules
 const user = require('./models/user');
@@ -76,25 +77,52 @@ app.get('/search', (req, res) => {
     });
   }
 
+  fs.readFile(path.join(__dirname, 'csvjson.json'), 'utf8', (err, data) => {
+
+    if (err) {
+
+      console.log("No se pudo leer el archivo.");
+      res.json({
+        success: false,
+        message: 'Invalid request, missing query parameter'
+      });
+
+    } else {
+
+      let tweetList = JSON.parse(data);
+      let results = tweetList.filter(tweet => tweet.Text.includes(req.query.q.toUpperCase()));
+
+      res.render('tweets-mock', {
+        layout: 'empty',
+        data: {
+          tweets: results,
+          loggedUser: req.session.userId
+        }
+      });
+
+    }
+
+  })
+
+  /*
   let twQuery = {
-    query: 'from:148845577',
+    query: 'from:ricarfort ' + req.query.q,
     fromDate: '200801010000'
   }
 
   twclient.get('tweets/search/fullarchive/dev', twQuery, (err, data, response) => {
     if (err) console.log(err);
 
-    res.json(data);
-
-    // res.render('tweets', {
-    //   layout: 'empty',
-    //   data: {
-    //     tweets: data.results,
-    //     loggedUser: req.session.userId
-    //   }
-    // });
+    res.render('tweets', {
+      layout: 'empty',
+      data: {
+        tweets: data.results,
+        loggedUser: req.session.userId
+      }
+    });
 
   })
+  */
 
 });
 
