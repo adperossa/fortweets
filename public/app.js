@@ -2,7 +2,7 @@ const searchForm = document.getElementById('search');
 const registerForm = document.getElementById('register-form');
 const loginForm = document.getElementById('login-form');
 const searchInput = document.getElementById('search-input');
-const twSection = document.getElementById('tweets');
+const twSection = document.getElementById('twresults');
 
 searchForm.addEventListener('submit', e => {
 
@@ -10,17 +10,31 @@ searchForm.addEventListener('submit', e => {
 
   if (searchInput.value === '') return;
 
+  twSection.innerHTML = '';
+
   fetch(`/search?q=${searchInput.value}`, { credentials: "same-origin" })
     .then(res => {
+
       if (!res.ok) throw new Error('Error in the fetch response');
       return res.text();
+
     })
     .then(data => {
-      twSection.innerHTML = data;
+
+      document.getElementById('spinner').classList.remove('u-hide');
       window.location.href= '#tweets';
+      searchInput.value = '';
+
+      setTimeout(() => {
+        twSection.innerHTML = data;
+        document.getElementById('spinner').classList.add('u-hide');
+      }, 2000);
+
     })
     .catch(err => {
+
       console.warn(err);
+      
     });
 
 })
