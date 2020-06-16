@@ -25,7 +25,7 @@ app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 app.engine('handlebars', expHbs({
   defaultLayout: 'main',
-  layoutsDir: path.join(__dirname, "views/layouts")
+  layoutsDir: path.join(__dirname, "views/layout")
 }));
 
 // Twitter
@@ -60,7 +60,11 @@ app.use(expSession({
 // Routes
 
 app.get('/', (req, res) => {
-  res.render('home');
+
+  res.render('home', {
+    loggedUser: req.session.userId
+  });
+
 });
 
 app.get('/search', (req, res) => {
@@ -72,10 +76,24 @@ app.get('/search', (req, res) => {
     });
   }
 
-  twclient.get('tweets/search/30day/dev', { query: req.query.q, maxResults: 10 }, (err, data, response) => {
+  let twQuery = {
+    query: 'from:148845577',
+    fromDate: '200801010000'
+  }
+
+  twclient.get('tweets/search/fullarchive/dev', twQuery, (err, data, response) => {
     if (err) console.log(err);
 
     res.json(data);
+
+    // res.render('tweets', {
+    //   layout: 'empty',
+    //   data: {
+    //     tweets: data.results,
+    //     loggedUser: req.session.userId
+    //   }
+    // });
+
   })
 
 });
@@ -99,9 +117,23 @@ app.post('/register', (req, res) => {
 
   user.create(newUser, result => {
 
-    res.json(result);
+    if (!result.success) {
 
-  })
+      res.status(400).json({
+        success: false,
+        message: 'Some error'
+      })
+
+    } else {
+
+      res.json({
+        success: true,
+        message: 'Registered succesfully'
+      })
+
+    }
+
+  });
 
 });
 
@@ -124,19 +156,36 @@ app.post('/login', (req, res) => {
   user.get(credentials, result => {
 
     if (!result.success) {
-      // No se pudo validar usuario
-      return;
+      // Couldn't validate user
+      res.status(401).json({
+        success: false,
+        message: "Couldn't authenticate user"
+      });
     } else {
       req.session.userId = result.data._id.toString();
-      res.json(result);
+      res.json({
+        success: true,
+        message: "Correctly logged in"
+      })
     }
 
   })
 
 });
 
+app.get('/logout', (req, res) => {
+
+  req.session.destroy();
+  res.redirect('/');
+
+})
+
 app.get('/favorites', (req, res) => {
 
+  if (!req.session.userId) {
+    return res.redirect('/');
+  }
+  
   // Construct user object to validate
   const loggedUser = {
     _id: new ObjectID('5ee6fbd32ce3b03754d3c198')
@@ -146,7 +195,7 @@ app.get('/favorites', (req, res) => {
 
     if (!result.success) {
       // No se pudo validar usuario
-      return;
+      return res.redirect('/');
     }
 
     idList = result.data.favorites.join();
@@ -154,7 +203,10 @@ app.get('/favorites', (req, res) => {
     twclient.get('statuses/lookup', { id: idList }, (err, data, response) => {
       if (err) console.log(err);
 
-      res.json(response);
+      res.render('favorites', { 
+        tweets: data,
+        loggedUser: req.session.userId });
+
     });
 
   });
@@ -163,13 +215,13 @@ app.get('/favorites', (req, res) => {
 
 app.post('/favorites/:action', (req, res) => {
 
-  // // Validate auth
-  // if (!req.session.userId) {
-  //   return res.status(401).json({
-  //     success: false,
-  //     message: "User is not logged in"
-  //   });
-  // }
+  // Validate auth
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "User is not logged in"
+    });
+  }
 
   // Validate required params
   if (!req.body.tweetId) {
@@ -181,10 +233,13 @@ app.post('/favorites/:action', (req, res) => {
 
   // Validate allowed actions
   if (req.params.action !== 'add' && req.params.action !== 'remove') {
-    return res.sendStatus(404);
+    return res.sendStatus(404).json({
+      success: false,
+      message: "Invalid route"
+    });;
   }
 
-  user.updateFavorites(req.params.action, "5ee6fbd32ce3b03754d3c198", req.body.tweetId, result => {
+  user.updateFavorites(req.params.action, req.session.userId, req.body.tweetId, result => {
     res.json(result);
   })
 

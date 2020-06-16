@@ -1,0 +1,36 @@
+{{#each data.tweets}}
+
+<div class="card content">
+  <div class="content">
+    <space></space>
+    <div class="tile tile--center">
+      <div class="tile__icon">
+        <figure class="avatar">
+          <img src="{{this.user.profile_image_url_https}}" alt="Person">
+        </figure>
+      </div>
+
+      <div class="tile__container">
+        <p class="tile__title">{{this.user.name}}</p>
+        <p class="tile__subtitle"><a>@{{this.user.screen_name}}</a></p>
+      </div>
+    </div>
+    {{#if this.extended_tweet.full_text}}
+    <p>v1</p>
+    {{else}}
+    <p>{{this.text}}</p>
+    {{/if}}
+  </div>
+  <div class="card-footer level content">
+    {{this.created_at}}
+    {{#if ../data.loggedUser}}
+      <div class="pull-right">
+        <div class="btn-container">
+          <button class="btn btn-info btn-small btn-guardar" onclick="favSave('{{this.id_str}}')">Guardar</button>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+{{/each}}

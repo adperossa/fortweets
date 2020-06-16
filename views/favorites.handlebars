@@ -1,0 +1,52 @@
+<div id="splash-img" class="hero fullscreen hero-img">
+  <div class="hero-body">
+    <div class="content u-text-center">
+      <img class="splash" src="splash.png" alt="">
+        <h5 class="uppercase white sub-title txtshadow">♥ Volvé a ver lo mejor de Ricardo ♥</h3>
+          <form id="search" class="form-group">
+            <input type="text" id="search-input" class="form-group-input input-large"
+              placeholder="Qué dijo el comandante sobre..."></input>
+            <button type="submit" id="searchSubmit" class="form-group-btn btn-xlarge">Buscar</button>
+          </form>
+    </div>
+  </div>
+</div>
+
+<section id="tweets" class="section content">
+
+  {{#each tweets}}
+
+    <div class="card content">
+      <div class="content">
+        <space></space>
+        <div class="tile tile--center">
+          <div class="tile__icon">
+            <figure class="avatar">
+              <img src="{{this.user.profile_image_url_https}}" alt="Person">
+            </figure>
+          </div>
+
+          <div class="tile__container">
+            <p class="tile__title">{{this.user.name}}</p>
+            <p class="tile__subtitle"><a>@{{this.user.screen_name}}</a></p>
+          </div>
+        </div>
+        {{#if this.extended_tweet.full_text}}
+        <p>v1</p>
+        {{else}}
+        <p>{{this.text}}</p>
+        {{/if}}
+      </div>
+      <div class="card-footer level content">
+        {{this.created_at}}
+        <div class="pull-right">
+          <div class="btn-container">
+            <button class="btn btn-warning btn-small btn-borrar" onclick="favDelete('{{this.id_str}}')">Borrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {{/each}}
+
+</section>

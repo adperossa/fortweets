@@ -1,12 +1,171 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/cirrus-ui">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge;" />
+  <link href="https://unpkg.com/cirrus-ui" type="text/css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:200,300,400,600,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+    integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
   <title>FORTweets</title>
 </head>
+
 <body>
-  {{body}}
+
+  <div class="header header-fixed unselectable header-animated">
+    <div class="header-brand">
+      <div class="nav-item no-hover">
+        <h6 class="title">FORTweets</h6>
+      </div>
+      <div class="nav-item nav-btn" id="header-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <div class="header-nav" id="header-menu">
+      <div class="nav-right">
+        {{#if loggedUser}}
+          <div class="nav-item">
+            <a href="/favorites">Ver favoritos</a>
+          </div>
+          <div class="nav-item">
+            <a href="/logout">Cerrar sesión</a>
+          </div>
+        {{else}}
+          <div class="nav-item">
+            <a href="#modal-register">Registrarse</a>
+          </div>
+          <div class="nav-item">
+            <a href="#modal-login">Iniciar sesión</a>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+  {{{body}}}
+
+  <div class="modal modal-animated--zoom-in" id="modal-register">
+    <a href="#asdf" class="modal-overlay close-btn" aria-label="Close"></a>
+    <div class="modal-content w-40" role="document">
+      <div class="modal-header">
+        <a href="#asdf" class="u-pull-right" aria-label="Close"><span class="icon"><i
+              class="fa fa-wrapper fa-times"></i></span></a>
+        <div class="modal-title">Registro</div>
+      </div>
+      <div class="modal-body">
+        <form id="register-form" name="register-form" class="frame p-0">
+          <div class="frame__body p-0">
+            <div class="row p-0 level fill-height">
+              <div class="col">
+                <div class="space xlarge"></div>
+                <div class="padded">
+                  <div class="form-section">
+                    <label>Nombre de usuario</label>
+                    <div class="input-control">
+                      <input class="input-contains-icon" id="reg-username" required name="username"
+                        placeholder="Usuario" type="text" value="">
+                      <span class="icon">
+                        <i class="far fa-wrapper fa-user-circle small"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="form-section">
+                    <label>Contraseña</label>
+                    <div class="input-control">
+                      <input class="input-contains-icon" id="reg-password" required name="password"
+                        placeholder="Password" type="password" value="">
+                      <span class="icon">
+                        <i class="fas fa-wrapper fa-key small"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="form-section">
+                    <label>Confirmar contraseña</label>
+                    <div class="input-control">
+                      <input class="input-contains-icon" required id="reg-passwordConfirm" name="passwordConfirm"
+                        placeholder="Confirmar Password" type="password" value="">
+                      <span class="icon">
+                        <i class="fas fa-wrapper fa-key small"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="form-section">
+                    <button class="btn-info u-pull-right" name="register" type="submit" form="register-form">
+                      Enviar
+                    </button>
+                  </div>
+                </div>
+                <div class="space xlarge"></div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="toast u-text-center u-center u-hide">
+          <p id="modal-msg"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal modal-animated--zoom-in" id="modal-login">
+    <a href="#asdf" class="modal-overlay close-btn" aria-label="Close"></a>
+    <div class="modal-content w-40" role="document">
+      <div class="modal-header">
+        <a href="#asdf" class="u-pull-right" aria-label="Close"><span class="icon"><i
+              class="fa fa-wrapper fa-times"></i></span></a>
+        <div class="modal-title">Iniciar sesión</div>
+      </div>
+      <div class="modal-body">
+        <form id="login-form" class="frame p-0" name="login-form" method="post">
+          <div class="frame__body p-0">
+            <div class="form-section">
+              <label>Usuario</label>
+              <div class="input-control">
+                <input class="input-contains-icon" id="login-username" required name="username" placeholder="Usuario"
+                  type="text" value="">
+                <span class="icon">
+                  <i class="far fa-wrapper fa-user-circle small"></i>
+                </span>
+              </div>
+            </div>
+            <div class="form-section">
+              <label>Contraseña</label>
+              <div class="input-control">
+                <input class="input-contains-icon" id="login-password" required name="password" placeholder="Contraseña"
+                  type="password" value="">
+                <span class="icon">
+                  <i class="fas fa-wrapper fa-key small"></i>
+                </span>
+              </div>
+            </div>
+            <div class="form-section">
+              <button class="btn-info u-pull-right" name="btn" value="login" type="submit" form="login-form">
+                Enviar
+              </button>
+            </div>
+            <div class="space"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="toast u-text-center u-center u-hide">
+          <p id="modal-msg"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js"
+    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+  <script src="app.js"></script>
 </body>
+
 </html>
